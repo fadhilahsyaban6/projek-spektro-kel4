@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulator 3D AAS GBC SensAA</title>
+<style>
+:root{--bg:#eef1f3;--ink:#17232d;--card:#fff;--line:#cfd8de;--st:#2c4a5e;--ac:#c2410c;--mut:#5b6b78;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11171c;--ink:#e6eef4;--card:#1a232b;--line:#2d3b46;--st:#8cc0e0;--ac:#fb923c;--mut:#9fb2c0}}
+:root[data-theme="dark"]{--bg:#11171c;--ink:#e6eef4;--card:#1a232b;--line:#2d3b46;--st:#8cc0e0;--ac:#fb923c;--mut:#9fb2c0}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Public Sans",system-ui,sans-serif}
+h1{font-size:17px;margin:0;padding:11px 14px;background:#2c4a5e;color:#fff}
+.main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:12px;padding:12px;max-width:1440px;margin:auto}
+@media(max-width:900px){.main{grid-template-columns:1fr}}
+#cv{position:relative;height:580px;background:#10151c;border-radius:8px;overflow:hidden;touch-action:none}
+@media(max-width:900px){#cv{height:62vh}}
+#cv canvas{display:block;width:100%;height:100%}
+#hud{position:absolute;left:10px;top:10px;color:#e6eef4;font-size:13px;background:#000a;padding:7px 10px;border-radius:6px;pointer-events:none}
+#hud b{font-size:20px;color:#ffb089}
+.hint{position:absolute;right:10px;bottom:8px;color:#9fb2c0;font-size:12px;pointer-events:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
+h2{font-size:16px;margin:4px 0 6px}
+nav{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+nav button{border:1px solid var(--line);background:transparent;color:var(--ink);padding:6px 10px;border-radius:6px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--st);color:var(--bg);border-color:var(--st)}
+.tab{display:none}.tab.on{display:block}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+button.b{border:1px solid var(--st);background:var(--card);color:var(--st);padding:6px 10px;border-radius:6px;font:inherit;font-weight:600;cursor:pointer}
+button.b.on,button.b.pri{background:var(--st);color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f59e0b;outline-offset:1px}
+select{width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:inherit}
+.chip{display:inline-block;background:var(--ac);color:#fff;border-radius:4px;padding:0 7px;font-weight:700;font-size:12px}
+#stD{border-left:4px solid var(--ac);padding:4px 10px;margin:8px 0;min-height:84px}
+.row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}
+.row span{flex:1}.row small{display:block;color:var(--mut);font-size:12px}
+.dot{width:11px;height:11px;border-radius:50%;background:#888;flex:none}.dot.g{background:#22c55e}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
+.note{color:var(--mut);font-size:12px}
+input[type=range]{width:100%}
+body{background:linear-gradient(180deg,#e8f1fb,var(--bg) 300px)}
+h1{display:none}
+.top{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.logo{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#06b6d4)}
+.top .sub{color:var(--mut);font-size:12px;margin-left:auto}
+#cv{background:linear-gradient(180deg,#d4e5f6,#f1f6fb)}
+#hud{background:#fffd;color:#17232d;border:1px solid #cfd8de}#hud b{color:#c2410c}
+.hint{color:#5b6b78}
+.card{border-radius:12px}
+.tb{padding:8px 10px;margin-bottom:10px}.tbr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:3px 0}.tl{font-size:11px;color:var(--mut);margin-right:4px}
+button.b{border-radius:8px;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+button.b.on,button.b.pri,nav button.on{background:#0ea5e9;border-color:#0ea5e9;color:#fff}
+nav button{border-radius:18px}
+#p3 h2,#p3 .btns{display:none}
+.lbl{position:absolute;width:150px;pointer-events:auto;background:#fff;border:1px solid #12a4d9;color:#17232d;border-radius:14px;padding:3px 8px;font:12px system-ui,sans-serif;text-align:left;cursor:pointer}
+#lbs,#ln{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none}
+#ln line{stroke:#12a4d9;stroke-width:1.2}#ln circle{fill:#fff;stroke:#12a4d9;r:4}
+</style>
+</head>
+<body>
+<header class="top"><span class="logo"></span><b>LAB VIRTUAL AAS SensAA</b><span class="sub">Instrumen 3D, rantai daya, dan simulasi SOP IK/LAB.INST/11</span></header>
+<div class="main">
+<div>
+<div class="card tb"><div class="tbr"><span class="tl">KAMERA</span><button class="b" data-c="depan">Depan</button><button class="b" data-c="samping">Samping</button><button class="b" data-c="kiri">Kiri</button><button class="b" data-c="atas">Atas</button><button class="b" data-c="optik">Optik</button><button class="b" data-c="kerja">Stasiun kerja</button><button class="b" data-c="monitor">Monitor</button><button class="b" data-c="saklar">Saklar daya</button><button class="b" data-c="ups">UPS</button><button class="b" data-c="pc">PC</button><button class="b" data-c="kabel">Kabel</button><button class="b" data-c="gas">Gas</button><button class="b" data-c="exh">Exhaust</button><button class="b" data-a="lb">Label</button><button class="b" data-a="reset">Atur ulang</button></div><div class="tbr"><span class="tl">TAHAPAN (luar → dalam)</span><button class="b on" data-s="0">1 Terpasang</button><button class="b" data-s="1">2 Tutup sampel</button><button class="b" data-s="2">3 Penutup dilepas</button><button class="b" data-s="3">4 Terurai</button><button class="b" data-s="4">5 Optik</button></div></div>
+<div id="cv"><div id="hud">Absorbansi Ca 422,7 nm<br><b id="hA">0,000</b> &nbsp; %T <span id="hT">100</span><br><span id="hN"></span></div><div id="lbs"></div><svg id="ln"></svg><div class="hint">Seret: putar. Roda/cubit: zoom. Klik komponen untuk info.</div></div>
+<div class="card" id="info" style="margin-top:12px"><b>Pilih komponen</b><br>Klik bagian pada model 3D untuk melihat fungsinya.</div>
+</div>
+<aside class="card">
+<nav id="tabs"><button data-t="p1" class="on">Simulasi SOP</button><button data-t="p2">Rantai daya</button><button data-t="p3">Tampilan 3D</button><button data-t="p4">Sistem optik</button></nav>
+<section id="p1" class="tab on">
+<span class="chip" id="stC"></span> <span class="note" id="stN"></span>
+<h2 id="stT"></h2><div id="stD"></div>
+<div class="btns"><button class="b" id="prev">Sebelumnya</button><button class="b pri" id="play">Putar otomatis</button><button class="b" id="next">Berikutnya</button></div>
+<select id="jump" aria-label="Loncat ke langkah"></select>
+<p class="note">Langkah mengikuti instruksi kerja: persiapan, metode, sample list, nyala, pengukuran, dan pematian alat. Model 3D disederhanakan, bukan skala sebenarnya.</p>
+</section>
+<section id="p2" class="tab">
+<div class="btns"><button class="b" data-a="all">Nyalakan semua</button><button class="b" data-a="cut">Putus listrik</button></div>
+<div class="btns"><span class="note">Mode:</span><button class="b on" data-m="0">Kendali mandiri</button><button class="b" data-m="1">Aliran sinyal</button></div>
+<div id="pw"></div><h2>Buka / tutup komponen</h2><div class="btns" id="oc"></div><p class="note">Klik komponen di model 3D lalu tekan Buka / tutup, atau pilih dari daftar ini.</p>
+<p class="note">AAS, PC, monitor, dan exhaust hanya aktif jika steker dinding dan UPS (Line + Batt) hidup. Api memerlukan AAS, gas, dan exhaust.</p>
+</section>
+<section id="p3" class="tab">
+<h2>Kamera</h2>
+<div class="btns"><button class="b" data-c="depan">Depan</button><button class="b" data-c="samping">Samping</button><button class="b" data-c="kiri">Kiri</button><button class="b" data-c="atas">Atas</button><button class="b" data-c="optik">Optik</button><button class="b" data-c="kerja">Stasiun kerja</button><button class="b" data-c="gas">Gas</button><button class="b" data-c="daya">UPS dan kabel</button></div>
+<h2>Pembongkaran virtual</h2>
+<div class="btns"><button class="b on" data-s="0">Terpasang</button><button class="b" data-s="1">Tutup sampel</button><button class="b" data-s="2">Penutup dilepas</button><button class="b" data-s="3">Terurai</button><button class="b" data-s="4">Optik</button></div>
+<label for="xr"><b>Transparansi bodi:</b> <span id="xrv">0%</span></label>
+<input type="range" id="xr" min="0" max="100" value="0">
+</section>
+<section id="p4" class="tab">
+<p class="note">Pilih komponen untuk menyorotnya di model 3D.</p>
+<div class="btns" id="ol"></div>
+</section>
+</aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const I=(n,d,g)=>({n,d,g});
+const B={wall:0,ups:0,exh:0,aas:0,pc:0,mon:0,gas:0,hcl:0,lamp:0,flame:0,kn:0,scr:'off',meas:0,mT:0,stage:0,tr:0,flow:0,sel:null,i:0};
+const S=Object.assign({},B);
+const P=()=>{const u=S.wall&&S.ups;return{wall:S.wall,ups:u,exh:u&&S.exh,aas:u&&S.aas,pc:u&&S.pc,mon:u&&S.pc&&S.mon}};
+const flameOn=()=>S.flame&&P().aas&&S.gas&&P().exh,beamOn=()=>S.lamp&&S.hcl&&P().aas;
+const ABS=[0,0,.042,.083,.127,.168,.094];
+const curA=()=>beamOn()&&flameOn()&&S.meas>0?ABS[Math.min(S.meas,7)-1]:0;
+const OPT=[['src','Sumber radiasi (HCL / EDL)','Lampu katoda berongga (HCL) Ca memancarkan garis spektrum Ca 422,7 nm. EDL dapat dipakai untuk unsur tertentu sesuai dukungan instrumen. Lampu dipasang pada turret.'],
+['dir','Sistem pengarah','Lensa dan cermin mengumpulkan berkas dari lampu, mengarahkannya melewati nyala, lalu menuju monokromator.'],
+['atom','Sistem atomisasi','Nebulizer, spray chamber, dan burner head Air-Acetylene (Fuel : Air = 2 : 10 L/min) mengubah larutan menjadi atom Ca bebas yang menyerap sinar.'],
+['slit1','Celah masuk','Membatasi berkas yang masuk ke monokromator dan ikut menentukan resolusi.'],
+['grat','Kisi difraksi','Elemen pendispersi yang memisahkan panjang gelombang sehingga hanya 422,7 nm yang diteruskan.'],
+['slit2','Celah keluar','Meloloskan pita sempit panjang gelombang terpilih menuju detektor.'],
+['det','Detektor (PMT)','Photomultiplier tube mengubah intensitas cahaya menjadi sinyal listrik.'],
+['sig','Pengolah sinyal','Elektronik dan PC GBC AAS mengubah sinyal PMT menjadi absorbansi A = -log(I/I0) dan konsentrasi dari kurva kalibrasi.']];
+const O={};OPT.forEach(o=>O[o[0]]=o);const Io=k=>I(O[k][1],O[k][2],k);
+
+/* scene */
+const cv=$('#cv'),R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));cv.prepend(R.domElement);
+const sc=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(45,1,.1,100);
+sc.add(new THREE.AmbientLight(0xffffff,.7));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(5,10,8);sc.add(dl);
+const IM=[];
+function mk(g,c,x,y,z,par,info,o){const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:.1},o||{})));m.position.set(x,y,z);(par||sc).add(m);if(info){m.userData.info=info;IM.push(m)}return m}
+const bx=(w,h,d,...a)=>mk(new THREE.BoxGeometry(w,h,d),...a),cy=(r,h,...a)=>mk(new THREE.CylinderGeometry(r,r,h,24),...a);
+function lab(t,x,y,z,sw){const c=document.createElement('canvas');c.width=256;c.height=64;const g=c.getContext('2d');g.font='bold 26px sans-serif';g.fillStyle='#17232d';g.textAlign='center';g.fillText(t,128,40);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));s.position.set(x,y,z);s.scale.set(sw||2,(sw||2)/4,1);sc.add(s)}
+/* ruang */
+bx(30,.1,14,0xeef3f8,0,-3.05,0);const gh=new THREE.GridHelper(30,30,0xb8c7d6,0xd3dde8);gh.position.y=-2.99;sc.add(gh);bx(30,12,.1,0xe9eff5,0,3,-3.2);
+bx(14,.3,4.4,0xb9c5d0,0,-.15,0,null,I('Meja kerja','Meja instrumen tempat AAS, monitor, dan UPS.'));
+[-6.8,6.8].forEach(x=>[-2,2].forEach(z=>bx(.2,2.7,.2,0x6b747c,x,-1.5,z)));
+/* instrumen */
+const A=new THREE.Group();A.position.set(1.5,0,0);sc.add(A);const BY=1;
+const shell=bx(1.5,1.8,2.2,0xf3f3f1,.95,.9,0,A,I('Bodi SensAA','Rumah instrumen AAS nyala GBC SensAA. Geser transparansi untuk melihat bagian dalam.'),{transparent:true,opacity:.3,depthWrite:false});
+const cover=bx(3.4,.4,2.2,0xdfe4e8,0,2,0,A,I('Penutup atas','Penutup bagian atas; dilepas untuk memasang lampu atau servis.'),{transparent:true,opacity:.3,depthWrite:false});
+const door=bx(1.3,1,.06,0x8fc1e3,-.5,1.05,1.13,A,I('Penutup kompartemen sampel','Pintu ruang burner. Buka sebelum menyalakan dan memantau api.'),{transparent:true,opacity:.55,depthWrite:false});
+bx(1,1.5,.06,0xcfd5da,1.2,.9,1.13,A,I('Panel gas','Panel depan dengan knop Support (udara) dan Fuel (asetilen) serta flowmeter. Bola flowmeter melayang saat gas mengalir.'));
+bx(.35,.8,.03,0xffffff,1.2,.55,1.17,A,I('Flowmeter','Bola pada skala fuel dan support harus melayang sebelum ignition.'));
+const mkKnob=x=>{const g=new THREE.Group();g.position.set(x,1.4,1.2);A.add(g);const k=cy(.13,.1,0x2f6bd0,0,0,0,g,I('Knop gas','Buka untuk mengalirkan gas; tutup setelah api mati, jangan terlalu mentok.'));k.rotation.x=Math.PI/2;bx(.03,.12,.04,0xffffff,0,.08,.06,g);return g};
+const kSup=mkKnob(.95),kFuel=mkKnob(1.45);
+const pw=cy(.08,.05,0x16a34a,1.45,.2,1.17,A,I('Tombol hijau AAS','Tombol hijau di kanan bawah alat: menyalakan dan mematikan AAS.'));pw.rotation.x=Math.PI/2;
+bx(1.2,.05,.7,0x2f7d4f,-.2,.2,-.75,A,Io('sig'));
+bx(3.5,.2,2.3,0x3a5063,0,.1,0,A,I('Alas instrumen','Dasar instrumen SensAA.'));
+const lb=bx(2,1.8,2.2,0xf3f3f1,-2.7,.9,0,A,I('Unit monitor dan komputer','Unit kiri berisi layar dan elektronik pengendali; menampilkan absorbansi secara langsung.'),{transparent:true,opacity:.3,depthWrite:false});
+const gl=bx(1.7,1.8,.06,0x111317,-.85,.9,-1.1,A,I('Kompartemen burner','Ruang terbuka berisi lampu katoda, burner, dan nyala; dinding dalam berwarna hitam.'),{transparent:true,opacity:1});bx(.06,1.8,2.2,0x15181c,-1.7,.9,0,A);bx(1.7,.05,2.2,0x1c1f24,-.85,.22,0,A);
+bx(2.1,.2,2.3,0x3a5063,-2.7,.1,0,A);
+[shell,cover,lb,gl].forEach(m=>m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:0x8d99a3}))));
+bx(1.75,1.35,.05,0x15171a,-2.7,1.05,1.12,A,I('Layar instrumen','Menampilkan absorbansi, %T, serta status lampu dan api.'));
+const IT=document.createElement('canvas');IT.width=512;IT.height=384;const ITx=new THREE.CanvasTexture(IT);
+const ims=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.2),new THREE.MeshBasicMaterial({map:ITx}));ims.position.set(-2.7,1.05,1.15);A.add(ims);
+function drawInst(){const g=IT.getContext('2d'),on=P().aas,a=curA();g.fillStyle=on?'#0b2a4a':'#0a0a0a';g.fillRect(0,0,512,384);if(on){g.fillStyle='#1f6fb2';g.fillRect(0,0,512,34);g.fillStyle='#fff';g.font='bold 18px sans-serif';g.fillText('SensAA | Ca 422,7 nm | Udara-C2H2',10,23);g.fillStyle='#9fb2c0';g.font='16px sans-serif';g.fillText('Absorbance',16,70);g.fillStyle='#fff';g.font='bold 84px sans-serif';g.fillText(a.toFixed(3).replace('.',','),16,160);g.font='18px sans-serif';g.fillStyle='#ffd24d';g.fillText('%T '+(100*Math.pow(10,-a)).toFixed(1).replace('.',','),16,196);g.fillStyle='#9fb2c0';g.fillText('Lampu: '+(beamOn()?'ON':'OFF')+'   Api: '+(flameOn()?'ON':'OFF'),16,230);g.strokeStyle='#22c55e';g.lineWidth=3;g.beginPath();g.moveTo(16,350-a*500);g.lineTo(496,350-a*500);g.stroke()}ITx.needsUpdate=true}
+bx(2.8,.08,.45,0xdfe6ec,-2.2,.04,1.45,A);
+const tubes=[0,1,2,3,4].map(i=>{const x=-3.2+i*.5;lab(i+' mg/L Ca',x+1.5,.95,1.5,.62);return cy(.1,.6,0xbfe3ff,x,.35,1.45,A,I('Standar '+i+' mg/L Ca','Tabung larutan baku kalibrasi; aspirasikan dari standar 1 hingga terakhir.'),{transparent:true,opacity:.7})});
+lab('SUPPORT',2.45,1.62,1.3,.7);lab('FUEL',2.95,1.62,1.3,.7);lab('GBC',2.95,1.78,1.15,.9);lab('SensAA',-1.2,1.76,1.15,.8);bx(.05,.7,.02,0xd32f2f,1.1,.55,1.2,A);bx(.05,.7,.02,0x2f6bd0,1.3,.55,1.2,A);bx(.9,.04,.5,0xe3e6e8,-2.7,1.82,.6,A);
+const Lg=new THREE.Group(),Bg=new THREE.Group(),Mg=new THREE.Group();A.add(Lg,Bg,Mg);
+const tur=cy(.45,.08,0x4a5a68,-1.5,BY,0,Lg,Io('src'));tur.rotation.z=Math.PI/2;
+const hcl=cy(.2,.7,0xc62828,-1.25,BY,0,Lg,Io('src'),{metalness:.4});hcl.rotation.z=Math.PI/2;
+const tip=mk(new THREE.SphereGeometry(.12,12,12),0x553322,-.88,BY,0,Lg);
+const lens=(x,g)=>{const l=mk(new THREE.SphereGeometry(.18,14,14),0x9fd8ff,x,BY,0,g,Io('dir'),{transparent:true,opacity:.5});l.scale.x=.25};lens(-.75,Lg);lens(-.12,Mg);
+cy(.27,.55,0x8b95a0,-.5,.4,0,Bg,Io('atom'));
+bx(1,.22,.45,0x15161a,-.5,.78,0,Bg,Io('atom'));
+const neb=cy(.07,1.1,0x4b5560,-.5,.4,-.55,Bg,Io('atom'));neb.rotation.x=Math.PI/2;
+const fl=new THREE.Group();fl.position.set(-.5,1.02,0);Bg.add(fl);
+const cone=(r,h,c,sx,sy,y)=>{const m=new THREE.Mesh(new THREE.ConeGeometry(r,h,14),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.8}));m.scale.set(sx,sy,.7);m.position.y=y;fl.add(m)};cone(.14,.6,0xff8a1f,3.2,1,0);cone(.1,.35,0x5aa9ff,2.6,1,-.12);
+[.12,-.12].forEach(y=>{bx(.04,.15,.3,0x222a30,.15,BY+y,0,Mg,Io('slit1'));bx(.3,.15,.04,0x222a30,.9,BY+y,-.55,Mg,Io('slit2'))});
+const gr=bx(.5,.45,.04,0xc9a227,.9,BY,0,Mg,Io('grat'),{metalness:.9,roughness:.25});gr.rotation.y=Math.PI/4;
+const pmt=cy(.16,.45,0x3b4a57,.9,BY,-.85,Mg,Io('det'));pmt.rotation.x=Math.PI/2;
+const seg=(a,b)=>{const p=new THREE.Vector3(...a),q=new THREE.Vector3(...b),d=q.clone().sub(p),m=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,d.length(),8),new THREE.MeshBasicMaterial({color:0xb9a6ff,transparent:true,opacity:.9}));m.position.copy(p.clone().add(q).multiplyScalar(.5));m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());A.add(m);return m};
+const bm=[seg([-.8,BY,0],[-.5,BY,0]),seg([-.5,BY,0],[.9,BY,0]),seg([.9,BY,0],[.9,BY,-.8])];
+bx(.1,.1,.1,0x888,.8,.4,-1.15,A);bx(.1,.1,.1,0x888,1.2,.4,-1.15,A);
+/* exhaust */
+mk(new THREE.CylinderGeometry(.22,.95,.8,28),0x1c1c1f,1,4,0,null,I('Hood exhaust','Menghisap gas buang nyala. Harus aktif sebelum api dinyalakan.'));
+cy(.22,1.5,0x9aa5ad,1,5.05,0,null,I('Saluran exhaust','Pipa pembuangan menuju kipas di dinding.'));
+const hp=cy(.22,3,0x9aa5ad,1,5.8,-1.5,null,I('Saluran exhaust','Pipa pembuangan menuju kipas di dinding.'));hp.rotation.x=Math.PI/2;
+bx(1.3,1.3,.1,0x6b747c,1,5.8,-3.05,null,I('Kipas exhaust','Kipas berputar saat kabel exhaust tersambung ke terminal UPS.'));
+const fan=new THREE.Group();fan.position.set(1,5.8,-2.98);sc.add(fan);bx(1,.12,.03,0xcfd8de,0,0,0,fan);bx(.12,1,.03,0xcfd8de,0,0,0,fan);
+/* UPS */
+const upB=bx(1.3,.7,1.1,0x2b3038,4.6,.35,.1,null,I('UPS','Menyuplai AAS, PC, monitor, dan exhaust. Naikkan tuas Line dan Batt saat menyalakan, turunkan saat mematikan.'));
+const ledL=bx(.12,.12,.05,0x224422,4.3,.5,.66),ledB=bx(.12,.12,.05,0x443311,4.9,.5,.66);
+bx(.3,.4,.05,0xddd,3,1.2,-3.12,null,I('Stopkontak dinding','Sumber listrik dinding. Cabut kabel dari sumber listrik, kecuali kabel UPS, setelah selesai.'));
+lab('UPS',4.6,1.3,.1);lab('Exhaust',1,6.7,-2.9);lab('SensAA AAS',1.5,3.2,0);
+/* workstation */
+const monF=bx(2,1.5,.12,0x1a1a1a,-3.3,1.25,.55,null,Io('sig'));bx(.2,.5,.15,0x333,-3.3,.3,.5);bx(.8,.05,.5,0x333,-3.3,.03,.5);bx(1.4,.05,.45,0xd0d0d0,-3.3,.04,1.5,null,I('Keyboard','Masukan data untuk metode dan sample list.'));
+const ST=document.createElement('canvas');ST.width=512;ST.height=380;const STx=new THREE.CanvasTexture(ST);
+const scrM=new THREE.Mesh(new THREE.PlaneGeometry(1.84,1.34),new THREE.MeshBasicMaterial({map:STx}));scrM.position.set(-3.3,1.25,.62);sc.add(scrM);
+const pcT=bx(.8,1.7,1.4,0x3a3f45,-5.3,.85,0,null,Io('sig'));const ledP=bx(.1,.1,.05,0x224422,-4.95,1.4,.72);
+lab('Komputer',-5.3,2.1,0);lab('Monitor',-3.3,2.3,.5);
+const pcP=bx(.04,1.6,1.3,0x4a5058,-4.88,.85,0,null,I('Panel samping PC','Panel samping casing komputer; dapat dibuka.'));bx(.5,.4,.8,0x222a30,-5.45,.3,0,null,I('Catu daya PC','Power supply komputer.'));bx(.04,1.2,1,0x2f7d4f,-5.6,.9,0,null,I('Motherboard','Papan utama komputer pengolah sinyal.'));
+const upL=bx(1.3,.06,1.1,0x3a414a,4.6,.73,.1,null,I('Penutup UPS','Penutup atas UPS; dibuka untuk melihat baterai.'));bx(.5,.35,.8,0x1e3a5f,4.3,.3,.1,null,I('Baterai UPS','Aki penyimpan energi cadangan.'));bx(.5,.35,.8,0x1e3a5f,4.9,.3,.1,null,I('Baterai UPS','Aki penyimpan energi cadangan.'));
+const monB=bx(1.9,1.4,.04,0x2a2a2a,-3.3,1.25,.45,null,I('Penutup belakang monitor','Panel belakang monitor; dibuka untuk melihat board.'));bx(1.2,.8,.03,0x2f7d4f,-3.3,1.25,.52,null,I('Board monitor','Elektronik penggerak layar.'));
+/* gas */
+cy(.4,2.2,0x7a1f1f,5.8,-1.9,-2.7,null,I('Tabung asetilen (C2H2)','Gas bahan bakar nyala Air-Acetylene. Buka dan tutup sesuai prosedur; flow Fuel : Air = 2 : 10 L/min.'));
+cy(.09,.35,0xb08d57,5.8,-.62,-2.7);const vh=bx(.5,.06,.06,0xb08d57,5.8,-.45,-2.7,null,I('Katup gas','Putar untuk membuka atau menutup aliran asetilen.'));
+bx(1.6,.9,1,0x1d4e89,-5.8,-2.5,-2.7,null,I('Kompresor udara','Menyuplai udara (oksidan) ke burner; dinyalakan sesuai prosedur.'));
+const tk=cy(.4,1.5,0x2563a8,-5.8,-1.75,-2.7,null,I('Kompresor udara','Menyuplai udara (oksidan) ke burner; dinyalakan sesuai prosedur.'));tk.rotation.z=Math.PI/2;
+lab('Gas C2H2',5.8,-.1,-2.7);lab('Kompresor udara',-5.8,-.9,-2.7);
+/* kabel dan aliran */
+const V=a=>new THREE.CatmullRomCurve3(a.map(p=>new THREE.Vector3(...p)));
+const cables=[],flows=[];
+function cable(pts,col,lit,on,fc){const c=V(pts),m=new THREE.Mesh(new THREE.TubeGeometry(c,40,.035,6,false),new THREE.MeshStandardMaterial({color:col}));sc.add(m);cables.push({m,lit,col:fc});flowAdd(c,fc,8,.35,()=>S.flow&&on())}
+function flowAdd(c,col,n,sp,on,size){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));const p=new THREE.Points(g,new THREE.PointsMaterial({color:col,size:size||.14}));p.frustumCulled=false;sc.add(p);flows.push({c,p,n,sp,on})}
+const pp=P;
+cable([[3,1.2,-3.05],[3.3,.3,-2],[4.2,.35,-.4]],0x222222,()=>S.wall,()=>S.wall,0xffd24d);
+cable([[4,.3,.1],[3.5,.1,-.4],[3.2,.35,-.8]],0x222222,()=>pp().aas,()=>pp().aas,0xffd24d);
+cable([[4.6,.2,-.55],[3,.05,-1.9],[-3,.05,-1.9],[-5.3,.4,-.7]],0x222222,()=>pp().pc,()=>pp().pc,0xffd24d);
+cable([[-4.9,.9,-.2],[-4.2,.05,.3],[-3.5,.8,.65]],0x222222,()=>pp().mon,()=>pp().mon,0xffd24d);
+cable([[4.9,.7,-.4],[5.2,3,-2],[1.3,5.75,-2.9]],0x222222,()=>pp().exh,()=>pp().exh,0xffd24d);
+cable([[-.2,.25,-1.1],[-1.5,.05,-1.5],[-4.9,.3,-.5]],0x1a3a4a,()=>pp().aas&&pp().pc,()=>pp().aas&&pp().pc,0x38e1ff);
+const gasL=(pts,col)=>{const c=V(pts);sc.add(new THREE.Mesh(new THREE.TubeGeometry(c,40,.05,6,false),new THREE.MeshStandardMaterial({color:col,transparent:true,opacity:.7})));flowAdd(c,col,26,.3,()=>S.gas,.17)};
+gasL([[5.8,-.45,-2.7],[5.8,.6,-2.7],[3.5,.7,-2.2],[.8,.4,-1.2]],0xf2c230);
+gasL([[-5.3,-1.4,-2.7],[-5.3,.6,-2.7],[-2,.7,-2.3],[1.2,.4,-1.2]],0x6bb8ff);
+/* layar komputer */
+function lines(){const m=S.meas;switch(S.scr){
+case'off':return['Desktop','[ikon] GBC AAS'];case'boot':return['Memulai komputer...','Memuat sistem operasi'];
+case'app':return['Aplikasi GBC AAS terbuka','Instrument: '+(P().aas?'READY':'menunggu AAS menyala...')];
+case'method':return['Method : Ca   (422,7 nm)','Background Corr. : tidak dicentang','Measurement : Integration','Calibration : Linear LS through Zero','Unit mg/L   Desimal 3   R Value 0,990','Zero Before Cal [v]  Auto Save [v]','Flame : Air-Acetylene','Fuel : Air = 2 : 10 L/min'];
+case'samples':return['No Type         Label','1  Calibration  Std 1-4','2  Sample       SPL 1 + LaCl3 FP 2x','','(hijau) Calibration  (merah) sampel akhir'];
+case'measure':{const T=['Zero Conc. (aquades)','Cal Blank (0 mg/L)','Standar 1 (1,0 mg/L)','Standar 2 (2,0 mg/L)','Standar 3 (3,0 mg/L)','Standar 4 (4,0 mg/L)','Sampel 1 + LaCl3 FP 2x'];
+const r=T.map((t,i)=>(i<m?'v ':i==m?'> ':'  ')+t.padEnd(24)+(i<m?ABS[i].toFixed(3):'---'));if(m>=6)r.push('','r = 0,9998 (lulus >= 0,990)');if(m>=7)r.push('C sampel = 2,24 x 2 = 4,48 mg/L');return r}
+case'stby':return['Instrument > Enter standby mode','(JANGAN klik OK)','Matikan AAS (tombol hijau), lalu OK'];
+case'report':return['Result > Print > OK','Printer: Novapdf (print to file)','Simpan PDF di folder kelas/kelompok']}return[]}
+function drawScr(){const g=ST.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,512,380);
+if(P().mon){g.fillStyle='#0b3a6b';g.fillRect(0,0,512,380);g.fillStyle='#1f6fb2';g.fillRect(0,0,512,28);g.fillStyle='#fff';g.font='bold 14px monospace';g.fillText('GBC AAS - '+S.scr,8,19);
+g.font='14px monospace';lines().forEach((t,i)=>{g.fillStyle=t[0]=='>'?'#ffd24d':'#dbe7f0';g.fillText(t,14,56+i*22)})}
+STx.needsUpdate=true}
+/* kamera */
+const CAM={monitor:{t:[-3.3,1.2,.5],th:.2,ph:1.3,r:5},saklar:{t:[2.95,.4,1.1],th:.3,ph:1.3,r:4.5},ups:{t:[4.6,.4,.1],th:-.3,ph:1.2,r:5},pc:{t:[-5.3,1,0],th:.5,ph:1.2,r:6},kabel:{t:[0,.3,-1.5],th:.2,ph:.9,r:13},depan:{t:[0,1,0],th:0,ph:1.3,r:15},samping:{t:[0,1,0],th:1.57,ph:1.3,r:15},kiri:{t:[0,1,0],th:-1.57,ph:1.3,r:15},atas:{t:[0,1,0],th:.01,ph:.2,r:17},optik:{t:[1.5,1,0],th:.5,ph:1,r:5.5},kerja:{t:[-3.5,1,.5],th:.3,ph:1.2,r:8},daya:{t:[3.8,.5,0],th:-.4,ph:1.2,r:7.5},gas:{t:[3,-.5,-1.5],th:.8,ph:1.25,r:10},exh:{t:[1,4.5,-1],th:.6,ph:1.2,r:8},unit:{t:[1.5,1,0],th:.3,ph:1.25,r:8},stasiun:{t:[0,.5,0],th:.5,ph:1.15,r:17}};
+const C={t:new THREE.Vector3(0,1,0),th:.5,ph:1.15,r:17},Gl={t:new THREE.Vector3(0,1,0),th:.5,ph:1.15,r:17};
+function go(k){const c=CAM[k];if(!c)return;Gl.t.set(...c.t);Gl.th=c.th;Gl.ph=c.ph;Gl.r=c.r}
+const pt=new Map();let moved=0;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pt.set(e.pointerId,[e.clientX,e.clientY]);moved=0});
+cv.addEventListener('pointermove',e=>{if(!pt.has(e.pointerId))return;const o=pt.get(e.pointerId),n=[e.clientX,e.clientY];
+if(pt.size==1){Gl.th-=(n[0]-o[0])*.008;Gl.ph=clamp(Gl.ph-(n[1]-o[1])*.008,.1,1.5)}
+else{const q=[...pt.entries()].find(([k])=>k!==e.pointerId)[1];Gl.r=clamp(Gl.r*Math.hypot(o[0]-q[0],o[1]-q[1])/Math.hypot(n[0]-q[0],n[1]-q[1]),3,30)}
+moved+=Math.abs(n[0]-o[0])+Math.abs(n[1]-o[1]);pt.set(e.pointerId,n)});
+cv.addEventListener('pointerup',e=>{pt.delete(e.pointerId);if(moved<5)pick(e)});
+cv.addEventListener('pointercancel',e=>pt.delete(e.pointerId));
+cv.addEventListener('wheel',e=>{e.preventDefault();Gl.r=clamp(Gl.r*(1+e.deltaY*.001),3,30)},{passive:false});
+const rc=new THREE.Raycaster();
+function showInfo(i){$('#info').innerHTML='<b>'+i.n+'</b><br>'+i.d+(i.o?'<br><button class="b" data-tg="'+i.o+'">Buka / tutup</button>':'')}
+function pick(e){const b=R.domElement.getBoundingClientRect();rc.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1),cam);
+const h=rc.intersectObjects(IM.filter(m=>m.visible&&m.material.opacity>.4),false)[0];if(h){const i=h.object.userData.info;S.sel=i.g||null;showInfo(i)}}
+function rs(){const w=cv.clientWidth,h=cv.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(rs).observe(cv);
+/* sinkronisasi */
+const OFF0={cover:[cover,[[0,0,0],[0,0,0],[0,1.1,0],[0,1.3,0],[0,1.1,0]]],door:[door,[[0,0,0],[0,.95,0],[0,.95,0],[0,.95,0],[0,.95,0]]],lamp:[Lg,[[0,0,0],[0,0,0],[0,0,0],[-2.4,0,0],[0,0,0]]],burn:[Bg,[[0,0,0],[0,0,0],[0,0,0],[0,0,2.6],[0,0,0]]],mono:[Mg,[[0,0,0],[0,0,0],[0,0,0],[1.8,0,-2.4],[0,0,0]]]};
+const OFF={cover:[cover,[0,1.1,0]],door:[door,[0,.95,0]],lamp:[Lg,[-2.1,0,0]],burn:[Bg,[0,0,2.4]],mono:[Mg,[1.6,0,-2.2]],pc:[pcP,[0,0,1.4]],ups:[upL,[0,.7,0]],mon:[monB,[0,0,-.9]]},bp={};for(const k in OFF)bp[k]=OFF[k][0].position.toArray();const tv=new THREE.Vector3(),tmp=new THREE.Vector3();
+let lastSig='';
+function sync(dt,tm){const p=P(),fo=flameOn(),bo=beamOn(),st=S.stage;
+for(const k in OFF){const [o,a]=OFF[k],b=bp[k],f=S.o[k]?1:0;tv.set(b[0]+a[0]*f,b[1]+a[1]*f,b[2]+a[2]*f);o.position.lerp(tv,.1)}
+const op=st==4?.06:1-S.tr;[shell,cover,lb,gl].forEach(m=>{m.material.opacity=op;m.material.depthWrite=op>.9});door.material.opacity=st==4?.06:.15;
+hcl.visible=!!S.hcl;tip.visible=!!S.hcl;tip.material.color.setHex(bo?0xffa24d:0x553322);tip.material.emissive.setHex(bo?0xff7a18:0);
+const a=curA(),t=Math.pow(10,-a)*.95;bm.forEach(b=>b.visible=!!bo&&!(S.o.lamp||S.o.burn||S.o.mono));bm[1].material.opacity=bm[2].material.opacity=t;
+fl.visible=!!fo;fl.scale.y=1+.06*Math.sin(tm*20)+.04*Math.sin(tm*33);
+const kr=S.kn?1.4:0;[kSup,kFuel].forEach(k=>k.rotation.z+=(kr-k.rotation.z)*.1);
+pw.material.emissive.setHex(p.aas?0x22c55e:0);
+ledL.material.color.setHex(p.ups?0x22ff66:0x224422);ledL.material.emissive.setHex(p.ups?0x22ff66:0);
+const bt=S.ups&&!S.wall;ledB.material.color.setHex(bt?0xffb020:0x443311);ledB.material.emissive.setHex(bt?0xffb020:0);
+ledP.material.color.setHex(p.pc?0x22ff66:0x224422);ledP.material.emissive.setHex(p.pc?0x22ff66:0);
+cables.forEach(c=>c.m.material.emissive.setHex(c.lit()?(c.col==0x38e1ff?0x0a4455:0x553300):0));
+fan.rotation.z+=dt*(p.exh?12:0);vh.rotation.y+=((S.gas?1.57:0)-vh.rotation.y)*.1;tubes.forEach((t,i)=>t.material.emissive.setHex(S.scr=='measure'&&S.meas-2==i?0x2255aa:0));[[pcT,'pc'],[upB,'ups'],[monF,'mon']].forEach(([m,k])=>{m.material.opacity=S.o[k]?.25:1;m.material.depthWrite=!S.o[k]});
+flows.forEach(f=>{const on=f.on();f.p.visible=!!on;if(!on)return;const ar=f.p.geometry.attributes.position.array;for(let i=0;i<f.n;i++){f.c.getPoint(((i/f.n)+tm*f.sp*(S.kn&&f.n>20?1.6:1))%1,tmp);ar[i*3]=tmp.x;ar[i*3+1]=tmp.y;ar[i*3+2]=tmp.z}f.p.geometry.attributes.position.needsUpdate=true});
+const sg=[p.mon,S.scr,S.meas,p.aas,fo,bo].join();if(sg!==lastSig){lastSig=sg;drawScr();drawInst()}
+$('#hA').textContent=a.toFixed(3).replace('.',',');$('#hT').textContent=(100*Math.pow(10,-a)).toFixed(1).replace('.',',');
+$('#hN').textContent='Lampu: '+(bo?'menyala':'mati')+' | Api: '+(fo?'menyala':'mati')+' | Gas: '+(S.gas?'terbuka':'tertutup')}
+let usig='',last=0,mt=0;
+function loop(t){requestAnimationFrame(loop);const tm=t/1000,dt=Math.min(.05,tm-last);last=tm;
+C.t.lerp(Gl.t,.08);C.th+=(Gl.th-C.th)*.08;C.ph+=(Gl.ph-C.ph)*.08;C.r+=(Gl.r-C.r)*.08;
+cam.position.set(C.t.x+C.r*Math.sin(C.ph)*Math.sin(C.th),C.t.y+C.r*Math.cos(C.ph),C.t.z+C.r*Math.sin(C.ph)*Math.cos(C.th));cam.lookAt(C.t);
+mt+=dt;if(mt>1){mt=0;if(S.meas<S.mT)S.meas++}
+sync(dt,tm);const sg=[S.wall,S.ups,S.exh,S.aas,S.pc,S.mon,S.gas,S.hcl,S.lamp,S.flame,S.flow,S.stage,S.sel,S.meas,S.lb,JSON.stringify(S.o)].join();if(sg!==usig){usig=sg;ui()}
+lblUpd();R.render(sc,cam)}
+/* UI */
+const DV=[['wall','Listrik dinding (steker)'],['ups','UPS (tuas Line dan Batt)'],['exh','Exhaust (kabel ke terminal)'],['aas','AAS (tombol hijau)'],['pc','Komputer (PC)'],['mon','Monitor'],['gas','Gas C2H2 dan kompresor udara'],['hcl','Lampu katoda terpasang'],['lamp','Lampu katoda menyala'],['flame','Api (Air-Acet dan ignition)']];
+function hl(){IM.forEach(m=>{const g=m.userData.info.g;m.material.emissive.setHex(S.sel&&g===S.sel?0x3b6bb5:S.stage==4&&g?0x1a2c44:0)})}
+function ui(){const p=P(),e={wall:p.wall,ups:p.ups,exh:p.exh,aas:p.aas,pc:p.pc,mon:p.mon,gas:S.gas,hcl:S.hcl,lamp:beamOn(),flame:flameOn()};
+$('#pw').innerHTML=DV.map(([k,n])=>{const on=S[k],ef=e[k];return`<div class="row"><i class="dot ${on?(ef?'g':'y'):'r'}"></i><span>${n}<small>${on?(ef?'Hidup':'Dipilih, tetapi syarat daya/gas belum terpenuhi'):'Mati'}</small></span><button class="b" data-k="${k}">${on?'Matikan':'Nyalakan'}</button></div>`}).join('');
+$('#oc').innerHTML=OC.map(([k,n])=>{const on=k=='gas'?S.gas:S.o[k];return`<button class="b ${on?'on':''}" data-tg="${k}">${on?'Tutup':'Buka'} ${n}</button>`}).join('');$$('[data-m]').forEach(b=>b.classList.toggle('on',+b.dataset.m===S.flow));$$('[data-s]').forEach(b=>b.classList.toggle('on',+b.dataset.s===S.stage));hl()}
+/* langkah SOP */
+const SP=[
+['A1','Pasang lampu katoda (HCL)','Periksa dan/atau pasang HCL sesuai analit (Ca). Penutup dilepas agar turret lampu terlihat.',{hcl:1,stage:2},'optik'],
+['A2','Buka gas asetilen dan kompresor','Buka aliran tabung gas asetilen (C2H2) dan kompresor udara sesuai prosedur. Partikel menunjukkan aliran gas ke instrumen.',{gas:1},'gas'],
+['A3','Nyalakan listrik dinding','Naikkan steker yang terdapat di dinding.',{wall:1},'daya'],
+['A4','Nyalakan UPS','Naikkan dua tuas (Line dan Batt) di bagian depan UPS. Pastikan UPS tersambung pada terminal.',{ups:1},'daya'],
+['A5','Nyalakan exhaust','Sambungkan kabel exhaust ke terminal.',{exh:1},'exh'],
+['A6','Nyalakan AAS','Tekan tombol hijau pada bagian kanan bawah AAS.',{aas:1},'unit'],
+['A7','Nyalakan komputer','Hidupkan komputer.',{pc:1,mon:1,scr:'boot'},'kerja'],
+['A8','Buka aplikasi GBC AAS','Tunggu hingga inisialisasi selesai (instrument ready).',{scr:'app'},'kerja'],
+['B','Buat metode dan standard list','Method, Element (Ca), Instrument (panjang gelombang di atas 300 nm: Background Correction tidak dicentang), Measurement Integration, Calibration Linear LS through Zero, mg/L, 3 desimal, R Value 0,990, lalu Standards, Flame Air-Acetylene Fuel : Air = 2 : 10 L/min, dan Save As.',{scr:'method'},'kerja'],
+['C','Buat sample list','Icon Samples. Nomor 1 type Calibration; nomor berikutnya sample dengan label dan faktor pengenceran (SPL 1 + LaCl3 FP 2x). Bulat hijau di Calibration, merah di sampel terakhir. Result, New, simpan.',{scr:'samples'},'kerja'],
+['D','Cek exhaust dan jatuhnya sinar','Pastikan exhaust berfungsi dan radiasi lampu katoda jatuh tepat pada jalur optik melewati burner.',{lamp:1,stage:4},'optik'],
+['E','Nyalakan api','Tekan Air-Acet lalu ignition dengan cepat. Jika api belum menyala ulangi; bila kedua bola flowmeter sudah melayang, tekan ignition lagi.',{flame:1,kn:1,stage:1},'unit'],
+['F1','Mulai pengukuran: zero dan blanko','Klik Start (hijau). Aspirasikan aquades sebagai Zero Concentration, lalu blanko 0 ppm sebagai Cal Blank, masing-masing OK.',{scr:'measure',mT:2},'unit'],
+['F2','Ukur larutan standar','Aspirasikan standar 1 sampai terakhir, klik OK tiap standar. Perhatikan intensitas berkas yang turun saat melewati nyala.',{mT:6},'optik'],
+['F3','Ukur sampel','Aspirasikan sampel 1 sampai terakhir, klik OK. Konsentrasi dihitung dari kurva kalibrasi.',{mT:7},'kerja'],
+['G','Matikan api','Tekan tombol Air-Acet. Tutup support dan fuel dengan memutar knop sampai tertutup (jangan terlalu mentok).',{flame:0,kn:0},'unit'],
+['H','Matikan lampu katoda','Instrument, Enter standby mode (JANGAN klik OK), matikan AAS dengan tombol hijau, baru klik OK.',{lamp:0,aas:0,scr:'stby',stage:0},'kerja'],
+['I','Cetak laporan','Result, Print, OK untuk mencetak, atau pilih printer Novapdf (print to file) untuk menyimpan PDF.',{scr:'report'},'kerja'],
+['J1','Catat di log book','Catat semua kejadian pada Log Book alat dan tanda tangani dengan nama jelas.',{},'kerja'],
+['J2','Tutup program dan matikan komputer','Pastikan lampu katoda sudah dimatikan, close program, lalu Turn Off komputer.',{pc:0,mon:0,scr:'off'},'kerja'],
+['J3','Matikan exhaust','Cabut kabel exhaust dari terminal.',{exh:0},'exh'],
+['J4','Matikan UPS','Turunkan dua tuas (Line dan Batt) pada UPS.',{ups:0},'daya'],
+['J5','Lepas kabel listrik','Lepaskan kabel dari sumber listrik, kecuali kabel UPS.',{wall:0},'daya'],
+['J6','Rapikan area kerja','Rapikan area sekitar instrumen dan komputer dari sampel dan standar, dan rapikan kursi ke tempat aman.',{},'stasiun'],
+['J7','Tutup gas','Tutup dan matikan aliran tabung gas asetilen dan kompresor udara sesuai prosedur.',{gas:0},'gas']];
+$('#jump').innerHTML=SP.map((s,i)=>`<option value="${i}">${s[0]}. ${s[1]}</option>`).join('');
+function setStep(i){i=clamp(i,0,SP.length-1);const om=S.meas,tr=S.tr,fl2=S.flow;Object.assign(S,B);S.tr=tr;S.flow=fl2;for(let k=0;k<=i;k++)Object.assign(S,SP[k][3]);S.i=i;S.o=Object.assign({},STG[S.stage]||{});S.meas=Math.min(om,S.mT);
+const s=SP[i];$('#stC').textContent=s[0];$('#stN').textContent=(i+1)+' dari '+SP.length;$('#stT').textContent=s[1];$('#stD').textContent=s[2];$('#jump').value=i;go(s[4]);$('#prev').disabled=i==0;$('#next').disabled=i==SP.length-1}
+let tm2=null;const stop=()=>{clearInterval(tm2);tm2=null;$('#play').textContent='Putar otomatis'};
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+if(d.t){if(d.t=='p4'){S.lb=1;setStage(4);go('optik')}$$('.tab').forEach(x=>x.classList.toggle('on',x.id==d.t));$$('#tabs button').forEach(x=>x.classList.toggle('on',x===b))}
+else if(d.k){S[d.k]=+!S[d.k];if(d.k=='flame')S.kn=S.flame;if(d.k=='pc'&&S.pc&&S.scr=='off')S.scr='boot'}
+else if(d.a=='all'){Object.assign(S,{wall:1,ups:1,exh:1,aas:1,pc:1,mon:1,gas:1,hcl:1,lamp:1,flame:1,kn:1});if(S.scr=='off'||S.scr=='boot')S.scr='app'}
+else if(d.a=='cut')S.wall=0;else if(d.a=='reset'){setStage(0);S.sel=null;go('stasiun')}else if(d.a=='lb')S.lb=+!S.lb;
+else if(d.m!==undefined)S.flow=+d.m;
+else if(d.c)go(d.c);else if(d.tg)tg(d.tg);
+else if(d.s!==undefined)setStage(+d.s);
+else if(d.o){S.sel=d.o;if(d.o!='sig')S.stage=4;go(d.o=='sig'?'kerja':'optik');showInfo(I(O[d.o][1],O[d.o][2]))}
+else if(b.id=='next'){stop();setStep(S.i+1)}else if(b.id=='prev'){stop();setStep(S.i-1)}
+else if(b.id=='play'){if(tm2){stop()}else{b.textContent='Jeda';tm2=setInterval(()=>{if(S.i>=SP.length-1)stop();else setStep(S.i+1)},5200)}}});
+$('#jump').addEventListener('change',e=>{stop();setStep(+e.target.value)});
+$('#xr').addEventListener('input',e=>{S.tr=e.target.value/100;$('#xrv').textContent=e.target.value+'%'});
+$('#ol').innerHTML=OPT.map(o=>`<button class="b" data-o="${o[0]}">${o[1]}</button>`).join('');
+const STG=[{},{door:1},{door:1,cover:1},{door:1,cover:1,lamp:1,burn:1,mono:1},{}];
+const OC=[['cover','penutup atas'],['door','pintu sampel'],['lamp','turret lampu'],['burn','burner'],['mono','monokromator'],['pc','panel PC'],['ups','penutup UPS'],['mon','belakang monitor'],['gas','katup gas C2H2']];
+function setStage(n){S.stage=n;S.o=Object.assign({},STG[n])}
+function tg(k){if(k=='gas')S.gas=+!S.gas;else S.o[k]=!S.o[k]}
+S.o={};S.lb=0;
+[[Lg,'lamp'],[Bg,'burn'],[Mg,'mono']].forEach(([g,k])=>g.children.forEach(m=>m.userData.info&&(m.userData.info.o=k)));
+[[pcT,'pc'],[pcP,'pc'],[upB,'ups'],[upL,'ups'],[monF,'mon'],[monB,'mon'],[cover,'cover'],[door,'door']].forEach(([m,k])=>{m.userData.info.o=k});
+[pcT,upB,monF].forEach(m=>{m.material.transparent=true;m.material.needsUpdate=true});
+const SV='http://www.w3.org/2000/svg',LBL=[['Sumber cahaya (HCL)','src',Lg,[-1.25,BY,0]],['Optik pengarah','dir',Lg,[-.75,BY,0]],['Sistem atomisasi','atom',Bg,[-.5,.72,0]],['Celah masuk','slit1',Mg,[.15,BY,0]],['Kisi difraksi','grat',Mg,[.9,BY,0]],['Celah keluar','slit2',Mg,[.9,BY,-.55]],['Detektor (PMT)','det',Mg,[.9,BY,-.85]],['Pengolah sinyal','sig',A,[-.2,.2,-.75]]];
+LBL.forEach(l=>{l.e=document.createElement('button');l.e.className='lbl';l.e.textContent=l[0];l.e.dataset.o=l[1];$('#lbs').appendChild(l.e);l.ln=document.createElementNS(SV,'line');l.dt=document.createElementNS(SV,'circle');$('#ln').append(l.ln,l.dt)});
+function lblUpd(){const w=cv.clientWidth,h=cv.clientHeight,on=S.lb;$('#lbs').style.display=$('#ln').style.display=on?'block':'none';if(!on)return;
+const a=LBL.map(l=>{const v=l[2].localToWorld(new THREE.Vector3(...l[3])).project(cam);l.x=(v.x+1)/2*w;l.y=(1-v.y)/2*h;return l}),L=a.filter(l=>l.x<w/2).sort((p,q)=>p.y-q.y),Rr=a.filter(l=>l.x>=w/2).sort((p,q)=>p.y-q.y);
+[[L,0],[Rr,1]].forEach(([arr,s])=>arr.forEach((l,i)=>{const ty=96+i*34,ex=s?w-160:160;l.e.style.cssText='top:'+ty+'px;'+(s?'right':'left')+':8px';l.ln.setAttribute('x1',ex);l.ln.setAttribute('y1',ty+14);l.ln.setAttribute('x2',l.x);l.ln.setAttribute('y2',l.y);l.dt.setAttribute('cx',l.x);l.dt.setAttribute('cy',l.y)}))}
+[[[[-.9,.45,.35],[-.9,.9,.5],[-.7,1.3,.3]],0xd32f2f],[[[-.3,.45,.35],[-.3,.9,.5],[-.45,1.3,.3]],0x2f6bd0]].forEach(([p,c])=>mk(new THREE.TubeGeometry(V(p),30,.03,6,false),c,0,0,0,Bg,I('Selang gas','Selang fuel (merah) dan oksidan (biru) menuju burner.')));
+rs();setStep(0);requestAnimationFrame(loop);
+</script>
+</body>
+</html>
